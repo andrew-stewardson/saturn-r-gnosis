@@ -4,8 +4,8 @@ Collaboration between SATURN WP3 and R-GNOSIS WP8
 
 ## Contributors
 
-Andrew Stewardson (andrew-stewardson)
-Ben Cooper
+- Andrew Stewardson (andrew-stewardson)
+- Ben Cooper
 
 ## Purpose
 

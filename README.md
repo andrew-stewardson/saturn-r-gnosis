@@ -9,7 +9,12 @@ Collaboration between SATURN WP3 and R-GNOSIS WP8
 
 ## Purpose
 
-R script using msm to describe gastrointestinal colonisation antimicrobial-resistant Enterobacteriaceae.  
+R script using msm to describe gastrointestinal colonisation antimicrobial-resistant Enterobacteriaceae.
+
+## Characteristics of dataset
+
+- arbritrary observation times i.e. transition times are not exactly observed
+- observations according to a 'fixed' schedule (with variation in practice)
 
 ## Packages
 

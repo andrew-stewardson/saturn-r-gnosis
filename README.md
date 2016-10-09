@@ -23,7 +23,7 @@ R script using msm to describe gastrointestinal colonisation antimicrobial-resis
 
 ## Requirements
 
-- data file (called 'master') is saved in csv format in following path: '/data/'
+- Dataframe saved as R data file (called 'df') in following path from the working directory: '/data/'
 - Output path: 'output/figures'
 
 ## Resources

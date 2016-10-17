@@ -32,7 +32,24 @@ https://cran.r-project.org/web/packages/msm/vignettes/msm-manual.pdf
 
 ## Data dictionary
 
-First Header | Second Header
------------- | -------------
-Content from cell 1 | Content from cell 2
-Content in the first column | Content in the second column
+ | Description | Values
+------------ | ------------- | -------------
+**Identifiers** | | 
+id_subject | study ID for subject |
+id_house | study ID for household |
+id_site | study site | "Antwerp","Geneva", "Lodz"
+**Baseline** ||
+bl_sex | subject sex | "female","male"
+bl_age | subject age at recruitment | Integer
+bl_travel | travel to 'high risk' country within 12 months | "no","yes"
+**Exposure** ||
+exposure | exposure category (fixed) | "no.antibiotic"  "nitrofurantoin" "ciprofloxacin"
+exposure.tv | exposure category (time varying) | "no.antibiotic", "nitrofurantoin", "post.nitrofurantoin", "ciprofloxacin", "post.ciprofloxacin" 
+**Observation** ||
+t | time (days) from day zero |
+state | colonisation status | 1=not colonised, 2=colonised
+sq | semi-quantitative result | continuous
+**Antibiotic dates** ||
+reported.ab.stdt | patient reported first antibiotic dose | yyyy-mm-dd hh:mm:ss
+reported.ab.eddt | patient reported last antibiotic dose |  yyyy-mm-dd hh:mm:ss
+collection.dt  | day/time of this sample | yyyy-mm-dd hh:mm:ss

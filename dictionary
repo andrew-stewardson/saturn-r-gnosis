@@ -1,0 +1,23 @@
+# Identifiers
+- id_subject
+- id_house
+- id_site
+
+# Baseline covariates
+- bl_sex
+- bl_age
+- bl_travel
+
+# Exposure category
+- exposure
+- exposure.tv
+
+# Observation
+- t
+- state
+- sq
+
+# Reported antibiotic timing
+- reported.ab.stdt
+- reported.ab.eddt
+- collection.dt  

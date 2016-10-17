@@ -29,3 +29,10 @@ R script using msm to describe gastrointestinal colonisation antimicrobial-resis
 ## Resources
 
 https://cran.r-project.org/web/packages/msm/vignettes/msm-manual.pdf
+
+## Data dictionary
+
+First Header | Second Header
+------------ | -------------
+Content from cell 1 | Content from cell 2
+Content in the first column | Content in the second column

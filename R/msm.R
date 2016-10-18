@@ -13,63 +13,66 @@ require(msm)
 
 load("data/df.Rda") 
 
-### Model 1. Specification & inits ----------------------------------------------------------------------
+### TWO-STATE MODELS: BINARY COLONISATION STATUS ----------------------------------------------  
+
+### 1. Specification & inits ----------------------------------------------------------------------
 
 # Transition table
-statetable.msm(state, charID, data=df)
+statetable.msm(state, id_subject, data=df)
 
 # Make dataframes for each exposure group, then show transition tables
 df.cip <- df %>% filter(exposure=="ciprofloxacin")
 df.nit <- df %>% filter(exposure=="nitrofurantoin")
 df.cnt <- df %>% filter(exposure=="no.antibiotic")
 
-statetable.msm(state, charID, data=df.cip)
-statetable.msm(state, charID, data=df.nit)
-statetable.msm(state, charID, data=df.cnt)
+statetable.msm(state, id_subject, data=df.cip)
+statetable.msm(state, id_subject, data=df.nit)
+statetable.msm(state, id_subject, data=df.cnt)
 
 rm(df.cip, df.cnt, df.nit)
 
 # Permitted transitions
 Q <- rbind(c(0.5, 0.5),
-           c(0.5,0.5))
+           c(0.5, 0.5))
 
 # Generate initial values
 Q.crude <- crudeinits.msm(state ~ t, 
-                          subject = charID, 
+                          subject = id_subject, 
                           data = df,
                           qmatrix = Q)
 
 ### Model 1. Run ----------------------------------------------------------------------
 
-## Model 1A. Two states, no covariates
+## Model 1A. No covariates
 
 # Fit model
-cip.msm <- msm(state ~ t, subject = charID, data = df, 
+cip.msm <- msm(state ~ t, subject = id_subject, data = df, 
                obstype=1, qmatrix = Q.crude)
 
 # Show results
 cip.msm
-plot(cip.msm)   # This command which worked in Brisbane now returns errors
 plot.prevalence.msm(cip.msm, mintime=0, maxtime=60,
                     legend.pos=c(1, 100))
 
 ## Model 1B. Two states, covariates = antibiotic exposure
 
 # Fit model
-cip.msm_cov <- msm(state ~ t, subject=charID, data=df,
-                   obstype=1, qmatrix=Q.crude,           
+cip.msm_cov <- msm(state ~ t, subject=id_subject, data=df,
+                   obstype=1, qmatrix=Q.crude,
                    covariates = ~ exposure)
 
 
+cip.msm_cov.2 <- msm(state ~ t, subject=id_subject, data=df,
+                   obstype=1, qmatrix=Q.crude,           
+                   covariates = ~ exposure.tv)
+
 # Show results
 cip.msm_cov
-plot(cip.msm_cov) # This command which worked in Brisbane now returns errors +++
 plot.prevalence.msm(cip.msm_cov, mintime = 0, maxtime = 10, legend.pos=c(5,70))
 plot.prevalence.msm(cip.msm_cov, mintime = 0, maxtime = 30, legend.pos=c(5,70),
                     covariates=list(exposure="ciprofloxacin"))
 plot.prevalence.msm(cip.msm_cov, mintime = 0, maxtime = 50, legend.pos=NULL,
                     subset=list(ab="ciprofloxacin"))
-
 
 ### Model 1B. Extract information ---------------------------------------------------------------------------------
 
@@ -79,6 +82,12 @@ qmatrix.msm(cip.msm_cov)
 qmatrix.msm(cip.msm_cov, covariates=list(exposure="no.antibiotic"))
 qmatrix.msm(cip.msm_cov, covariates=list(exposure="ciprofloxacin"))
 qmatrix.msm(cip.msm_cov, covariates=list(exposure="nitrofurantoin"))
+
+qmatrix.msm(cip.msm_cov, covariates=list(exposure.tv="no.antibiotic"))
+qmatrix.msm(cip.msm_cov, covariates=list(exposure.tv="ciprofloxacin"))
+qmatrix.msm(cip.msm_cov, covariates=list(exposure.tv="post.ciprofloxacin"))
+qmatrix.msm(cip.msm_cov, covariates=list(exposure.tv="nitrofurantoin"))
+qmatrix.msm(cip.msm_cov, covariates=list(exposure.tv="post.nitrofurantoin"))
 
 # Transition probability matrix
 # = estimated transition probability matrix P(t) within a given time
@@ -103,7 +112,7 @@ qratio.msm(cip.msm_cov, ind1 = c(1,2), ind2 = c(2,1), covariates=list(exposure="
 hazard.msm(cip.msm_cov)
 #
 
-
+### THREE-STATE MODELS: BASED ON SEMI-QUANTITATIVE CULTURE ----------------------------------------------  
 
 
 

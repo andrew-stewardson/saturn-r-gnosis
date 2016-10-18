@@ -34,7 +34,7 @@ https://cran.r-project.org/web/packages/msm/vignettes/msm-manual.pdf
 
  | Description | Values
 ------------ | ------------- | -------------
-**Identifiers** | | 
+**Identifiers** | |
 id_subject | study ID for subject |
 id_house | study ID for household |
 id_site | study site | "Antwerp","Geneva", "Lodz"

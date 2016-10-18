@@ -48,6 +48,7 @@ exposure.tv | exposure category (time varying) | "no.antibiotic", "nitrofurantoi
 **Observation** ||
 t | time (days) from day zero |
 state | colonisation status | 1=not colonised, 2=colonised
+state.sq3 | colonisation status | 1=not colonised, 2='low level colonisation' (RA<=0.1%), 3='high level colonisation' (RA>0.1%)
 sq | semi-quantitative result | continuous
 **Antibiotic dates** ||
 reported.ab.stdt | patient reported first antibiotic dose | yyyy-mm-dd hh:mm:ss

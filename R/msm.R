@@ -55,15 +55,20 @@ cip.2s.3 <- msm(state ~ t.subject, subject=id_subject, data=df,
                    obstype=1, qmatrix=Q.crude,           
                    covariates = ~ exposure.tv)
 
-# Covariates: antibiotic (fixed) + travel to 'endemic' country
+# Covariates: antibiotic (fixed) + travel to 'endemic' country (transition 1-2)
 cip.2s.4 <- msm(state ~ t.subject, subject=id_subject, data=df,
                      obstype=1, qmatrix=Q.crude,           
-                     covariates = ~ exposure + bl_travel)
+                     covariates = list("1-2" = ~ bl_travel + exposure,
+                                       "2-1" = ~ exposure))
 
 # Show results
 plot.prevalence.msm(cip.2s.1, mintime=0, maxtime=60, legend.pos=c(1, 100))
+
+prevalence.msm(cip.2s.2, mintime=0, maxtime=30)
 plot.prevalence.msm(cip.2s.2, mintime=0, maxtime=60, legend.pos=c(1, 100))
+
 plot.prevalence.msm(cip.2s.3, mintime=0, maxtime=60, legend.pos=c(1, 100))
+plot.prevalence.msm(cip.2s.4, mintime=0, maxtime=60, legend.pos=c(1, 100))
 
 cip.2s.1
 cip.2s.2
@@ -72,6 +77,7 @@ cip.2s.4
 
 lrtest.msm(cip.2s.1, cip.2s.2)
 lrtest.msm(cip.2s.1, cip.2s.3)
+lrtest.msm(cip.2s.2, cip.2s.4)
 
 plot.prevalence.msm(cip.2s.2, mintime = 0, maxtime = 60, legend.pos=c(5,70))
 plot.prevalence.msm(cip.2s.2, mintime = 0, maxtime = 30, legend.pos=c(5,70),

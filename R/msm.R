@@ -32,44 +32,51 @@ Q <- rbind(c(0.5, 0.5),
            c(0.5, 0.5))
 
 # Generate initial values
-Q.crude <- crudeinits.msm(state ~ t, 
+Q.crude <- crudeinits.msm(state ~ t.subject, 
                           subject = id_subject, 
                           data = df,
                           qmatrix = Q)
 
-### Model 1. Run ----------------------------------------------------------------------
+### Model Run ----------------------------------------------------------------------
 
-## Model 1A. No covariates
+## Fit models
 
-# Fit model
-cip.msm <- msm(state ~ t, subject = id_subject, data = df, 
+# Covariates: none
+cip.2s.1 <- msm(state ~ t.subject, subject = id_subject, data = df, 
                obstype=1, qmatrix = Q.crude)
 
-# Show results
-cip.msm
-plot.prevalence.msm(cip.msm, mintime=0, maxtime=60,
-                    legend.pos=c(1, 100))
-
-## Model 1B. Two states, covariates = antibiotic exposure
-
-# Fit model
-cip.msm_cov <- msm(state ~ t, subject=id_subject, data=df,
+# Covariates: antibiotic (fixed)
+cip.2s.2 <- msm(state ~ t.subject, subject=id_subject, data=df,
                    obstype=1, qmatrix=Q.crude,
                    covariates = ~ exposure)
 
-
-cip.msm_cov.2 <- msm(state ~ t, subject=id_subject, data=df,
+# Covariates: antibiotic (time-varying)
+cip.2s.3 <- msm(state ~ t.subject, subject=id_subject, data=df,
                    obstype=1, qmatrix=Q.crude,           
                    covariates = ~ exposure.tv)
 
-# Show results
-cip.msm_cov
-cip.msm_cov.2
+# Covariates: antibiotic (fixed) + travel to 'endemic' country
+cip.2s.4 <- msm(state ~ t.subject, subject=id_subject, data=df,
+                     obstype=1, qmatrix=Q.crude,           
+                     covariates = ~ exposure + bl_travel)
 
-plot.prevalence.msm(cip.msm_cov, mintime = 0, maxtime = 10, legend.pos=c(5,70))
-plot.prevalence.msm(cip.msm_cov, mintime = 0, maxtime = 30, legend.pos=c(5,70),
+# Show results
+plot.prevalence.msm(cip.2s.1, mintime=0, maxtime=60, legend.pos=c(1, 100))
+plot.prevalence.msm(cip.2s.2, mintime=0, maxtime=60, legend.pos=c(1, 100))
+plot.prevalence.msm(cip.2s.3, mintime=0, maxtime=60, legend.pos=c(1, 100))
+
+cip.2s.1
+cip.2s.2
+cip.2s.3
+cip.2s.4
+
+lrtest.msm(cip.2s.1, cip.2s.2)
+lrtest.msm(cip.2s.1, cip.2s.3)
+
+plot.prevalence.msm(cip.2s.2, mintime = 0, maxtime = 60, legend.pos=c(5,70))
+plot.prevalence.msm(cip.2s.2, mintime = 0, maxtime = 30, legend.pos=c(5,70),
                     covariates=list(exposure="ciprofloxacin"))
-plot.prevalence.msm(cip.msm_cov, mintime = 0, maxtime = 50, legend.pos=NULL,
+plot.prevalence.msm(cip.2s.2, mintime = 0, maxtime = 50, legend.pos=NULL,
                     subset=list(ab="ciprofloxacin"))
 
 ### Model 1B. Extract information ---------------------------------------------------------------------------------
@@ -107,7 +114,7 @@ qratio.msm(cip.msm_cov, ind1 = c(1,2), ind2 = c(2,1), covariates=list(exposure="
 
 # Hazard ratios for transition
 # =  estimated hazard ratios corresponding to each covariate effect on the transition intensities
-hazard.msm(cip.msm_cov)
+hazard.msm(cip.msm_cov.3)
 #
 
 ### THREE-STATE MODELS: BASED ON SEMI-QUANTITATIVE CULTURE ----------------------------------------------  
@@ -134,8 +141,8 @@ Q.3.crude <- crudeinits.msm(state.sq3 ~ t,
 
 # Fit model
 cip.msm3 <- msm(state.sq3 ~ t, subject = id_subject, data = df, 
-               obstype=1, qmatrix = Q.3.crude)
+                obstype=1, qmatrix = Q.3.crude)
 
-cip.msm3 <- msm(state.sq3 ~ t, subject=id_subject, data=df,
-                   obstype=1, qmatrix=Q.3.crude,
-                   covariates = ~ exposure)
+cip.msm3 <- msm(state.sq3 ~ t, subject = id_subject, data=df,
+                obstype = 1, qmatrix = Q.3.crude,
+                covariates = ~ exposure)

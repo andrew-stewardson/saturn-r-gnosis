@@ -46,7 +46,7 @@ bl_travel | travel to 'high risk' country within 12 months | "no","yes"
 exposure | exposure category (fixed) | "no.antibiotic"  "nitrofurantoin" "ciprofloxacin"
 exposure.tv | exposure category (time varying) | "no.antibiotic", "nitrofurantoin", "post.nitrofurantoin", "ciprofloxacin", "post.ciprofloxacin" 
 **Observation** ||
-t | time (days) from day zero |
+t | time (days) from first sample in that house (t=0) |
 state | colonisation status | 1=not colonised, 2=colonised
 state.sq3 | colonisation status | 1=not colonised, 2='low level colonisation' (RA<=0.1%), 3='high level colonisation' (RA>0.1%)
 sq | semi-quantitative result | continuous

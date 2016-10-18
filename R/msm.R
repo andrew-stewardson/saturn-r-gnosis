@@ -1,10 +1,6 @@
 # PROJECT: SATURN & R-GNOSIS
 # PURPOSE: Multistate model analysis
 
-# AUTHOR: A. Stewardson
-# DATE STARTED: 23.03.2015
-# DATE UPDATED: 09.10.2016
-
 ### Set-up ----------------------------------------------------------------------
 
 require(dplyr)
@@ -68,6 +64,8 @@ cip.msm_cov.2 <- msm(state ~ t, subject=id_subject, data=df,
 
 # Show results
 cip.msm_cov
+cip.msm_cov.2
+
 plot.prevalence.msm(cip.msm_cov, mintime = 0, maxtime = 10, legend.pos=c(5,70))
 plot.prevalence.msm(cip.msm_cov, mintime = 0, maxtime = 30, legend.pos=c(5,70),
                     covariates=list(exposure="ciprofloxacin"))
@@ -114,3 +112,30 @@ hazard.msm(cip.msm_cov)
 
 ### THREE-STATE MODELS: BASED ON SEMI-QUANTITATIVE CULTURE ----------------------------------------------  
 
+### 1. Specification & inits ----------------------------------------------------------------------
+
+# Transition table
+statetable.msm(state.sq3, id_subject, data=df)
+
+# Permitted transitions
+Q.3 <- rbind(c(0.5, 0.5, 0),
+           c(1/3, 1/3, 1/3),
+           c(0, 0.5, 0.5))
+
+# Generate initial values
+Q.3.crude <- crudeinits.msm(state.sq3 ~ t, 
+                          subject = id_subject, 
+                          data = df,
+                          qmatrix = Q.3)
+
+### Model 2. Run ----------------------------------------------------------------------
+
+## Model 2A. No covariates
+
+# Fit model
+cip.msm3 <- msm(state.sq3 ~ t, subject = id_subject, data = df, 
+               obstype=1, qmatrix = Q.3.crude)
+
+cip.msm3 <- msm(state.sq3 ~ t, subject=id_subject, data=df,
+                   obstype=1, qmatrix=Q.3.crude,
+                   covariates = ~ exposure)

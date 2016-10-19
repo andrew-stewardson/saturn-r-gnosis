@@ -46,6 +46,7 @@ cip.2s.1 <- msm(state ~ t.subject, subject = id_subject, data = df,
                obstype = 1, qmatrix = Q.crude)
 
 # Covariates: antibiotic (fixed)
+
 cip.2s.2 <- msm(state ~ t.subject, subject = id_subject, data = df,
                    obstype = 1, qmatrix = Q.crude,
                    covariates = ~ exposure)
@@ -128,6 +129,15 @@ hazard.msm(cip.2s.2)
 
 # Transition table
 statetable.msm(state.sq3, id_subject, data = df)
+
+# Make dataframes for each exposure group, then show transition tables
+df.cip <- df %>% filter(exposure=="ciprofloxacin")
+df.nit <- df %>% filter(exposure=="nitrofurantoin")
+df.cnt <- df %>% filter(exposure=="no.antibiotic")
+
+statetable.msm(state.sq3, id_subject, data=df.cip)
+statetable.msm(state.sq3, id_subject, data=df.nit)
+statetable.msm(state.sq3, id_subject, data=df.cnt)
 
 # Permitted transitions
 Q.3 <- rbind(c(0.5, 0.5, 0),

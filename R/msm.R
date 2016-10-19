@@ -42,22 +42,22 @@ Q.crude <- crudeinits.msm(state ~ t.subject,
 ## Fit models
 
 # Covariates: none
-cip.2s.1 <- msm(state ~ t.subject, subject = id_subject, data = df, 
+cip.2s.1 <- msm(state ~ t.subject, subject = as.numeric(id_subject), data = df, 
                obstype = 1, qmatrix = Q.crude)
 
 # Covariates: antibiotic (fixed)
 
-cip.2s.2 <- msm(state ~ t.subject, subject = id_subject, data = df,
+cip.2s.2 <- msm(state ~ t.subject, subject = as.numeric(id_subject), data = df,
                    obstype = 1, qmatrix = Q.crude,
                    covariates = ~ exposure)
 
 # Covariates: antibiotic (time-varying)
-cip.2s.3 <- msm(state ~ t.subject, subject = id_subject, data = df,
+cip.2s.3 <- msm(state ~ t.subject, subject = as.numeric(id_subject), data = df,
                    obstype = 1, qmatrix=Q.crude,           
                    covariates = ~ exposure.tv)
 
 # Covariates: antibiotic (fixed) + travel to 'endemic' country (transition 1-2)
-cip.2s.4 <- msm(state ~ t.subject, subject = id_subject, data = df,
+cip.2s.4 <- msm(state ~ t.subject, subject = as.numeric(id_subject), data = df,
                      obstype = 1, qmatrix = Q.crude,           
                      covariates = list("1-2" = ~ bl_travel + exposure,
                                        "2-1" = ~ exposure))
@@ -155,36 +155,36 @@ Q.3.crude <- crudeinits.msm(state.sq3 ~ t,
 ## Fit models
 
 # Covariates: none
-cip.3s.1 <- msm(state.sq3 ~ t, subject = id_subject, data = df, 
+cip.3s.1 <- msm(state.sq3 ~ t, subject = as.numeric(id_subject), data = df, 
                 obstype = 1, qmatrix = Q.3.crude)
 
-cip.3s.1 <- msm(state.sq3 ~ t, subject = id_subject, data = df, 
+cip.3s.1 <- msm(state.sq3 ~ t, subject = as.numeric(id_subject), data = df, 
                 obstype = 1, qmatrix = Q.3.crude,
                 method='CG')
 
-cip.3s.1 <- msm(state.sq3 ~ t, subject = id_subject, data = df, 
+cip.3s.1 <- msm(state.sq3 ~ t, subject = as.numeric(id_subject), data = df, 
                 obstype = 1, qmatrix = Q.3.crude,
                 method='CG',
                 control=list(maxit=10000))
 
 # Covariates: antibiotic (fixed)
-cip.3s.2 <- msm(state.sq3 ~ t, subject = id_subject, data = df,
+cip.3s.2 <- msm(state.sq3 ~ t, subject = as.numeric(id_subject), data = df,
                 obstype = 1, qmatrix = Q.3.crude,
                 covariates = ~ exposure)
 
-cip.3s.2 <- msm(state.sq3 ~ t, subject = id_subject, data = df, 
+cip.3s.2 <- msm(state.sq3 ~ t, subject = as.numeric(id_subject), data = df, 
                 obstype = 1, qmatrix = Q.3.crude,
                 covariates = ~ exposure,
                 method='CG',
                 control=list(maxit=100000))
 
 # Covariates: antibiotic (time-varying)
-cip.3s.3 <- msm(state.sq3 ~ t.subject, subject = id_subject, data = df,
+cip.3s.3 <- msm(state.sq3 ~ t.subject, subject = as.numeric(id_subject), data = df,
                 obstype = 1, qmatrix=Q.crude,           
                 covariates = ~ exposure.tv)
 
 # Covariates: antibiotic (fixed) + travel to 'endemic' country (transition 1-2)
-cip.3s.4 <- msm(state.sq3 ~ t.subject, subject=id_subject, data = df,
+cip.3s.4 <- msm(state.sq3 ~ t.subject, subject = as.numeric(id_subject), data = df,
                 obstype = 1, qmatrix=Q.crude,           
                 covariates = list("1-2" = ~ bl_travel + exposure,
                                   "2-1" = ~ exposure))

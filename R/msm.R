@@ -11,7 +11,7 @@ load("data/df.Rda")
 
 ### TWO-STATE MODELS: BINARY COLONISATION STATUS ----------------------------------------------  
 
-### 1. Specification & inits ----------------------------------------------------------------------
+### Specification & inits ----------------------------------------------------------------------
 
 # Transition table
 statetable.msm(state, id_subject, data=df)
@@ -37,98 +37,97 @@ Q.crude <- crudeinits.msm(state ~ t.subject,
                           data = df,
                           qmatrix = Q)
 
-### Model Run ----------------------------------------------------------------------
+### Run Models ----------------------------------------------------------------------
 
 ## Fit models
 
 # Covariates: none
 cip.2s.1 <- msm(state ~ t.subject, subject = id_subject, data = df, 
-               obstype=1, qmatrix = Q.crude)
+               obstype = 1, qmatrix = Q.crude)
 
 # Covariates: antibiotic (fixed)
-cip.2s.2 <- msm(state ~ t.subject, subject=id_subject, data=df,
-                   obstype=1, qmatrix=Q.crude,
+cip.2s.2 <- msm(state ~ t.subject, subject = id_subject, data = df,
+                   obstype = 1, qmatrix = Q.crude,
                    covariates = ~ exposure)
 
 # Covariates: antibiotic (time-varying)
-cip.2s.3 <- msm(state ~ t.subject, subject=id_subject, data=df,
-                   obstype=1, qmatrix=Q.crude,           
+cip.2s.3 <- msm(state ~ t.subject, subject = id_subject, data = df,
+                   obstype = 1, qmatrix=Q.crude,           
                    covariates = ~ exposure.tv)
 
 # Covariates: antibiotic (fixed) + travel to 'endemic' country (transition 1-2)
-cip.2s.4 <- msm(state ~ t.subject, subject=id_subject, data=df,
-                     obstype=1, qmatrix=Q.crude,           
+cip.2s.4 <- msm(state ~ t.subject, subject = id_subject, data = df,
+                     obstype = 1, qmatrix = Q.crude,           
                      covariates = list("1-2" = ~ bl_travel + exposure,
                                        "2-1" = ~ exposure))
 
 # Show results
-plot.prevalence.msm(cip.2s.1, mintime=0, maxtime=60, legend.pos=c(1, 100))
+# ("The intensity represents the instantaneous risk of moving from state r to state s")
+cip.2s.1 # Base
+cip.2s.2 # Antibiotics (fixed)
+cip.2s.3 # Antibiotics (time-varying)
+cip.2s.4 # Antibiotics (fixed) + travel
 
-prevalence.msm(cip.2s.2, mintime=0, maxtime=30)
-plot.prevalence.msm(cip.2s.2, mintime=0, maxtime=60, legend.pos=c(1, 100))
+plot.prevalence.msm(cip.2s.1, mintime = 0, maxtime = 60, legend.pos = c(1, 100)) # Base
+plot.prevalence.msm(cip.2s.2, mintime = 0, maxtime = 60, legend.pos = c(1, 100)) # Antibiotics (fixed)
+plot.prevalence.msm(cip.2s.3, mintime = 0, maxtime = 60, legend.pos = c(1, 100)) # Antibiotics (time-varying)
+plot.prevalence.msm(cip.2s.4, mintime = 0, maxtime = 60, legend.pos = c(1, 100)) # Antibiotics (fixed) + travel
 
-plot.prevalence.msm(cip.2s.3, mintime=0, maxtime=60, legend.pos=c(1, 100))
-plot.prevalence.msm(cip.2s.4, mintime=0, maxtime=60, legend.pos=c(1, 100))
-
-cip.2s.1
-cip.2s.2
-cip.2s.3
-cip.2s.4
-
-lrtest.msm(cip.2s.1, cip.2s.2)
-lrtest.msm(cip.2s.1, cip.2s.3)
-lrtest.msm(cip.2s.2, cip.2s.4)
-
-plot.prevalence.msm(cip.2s.2, mintime = 0, maxtime = 60, legend.pos=c(5,70))
-plot.prevalence.msm(cip.2s.2, mintime = 0, maxtime = 30, legend.pos=c(5,70),
+plot.prevalence.msm(cip.2s.2, mintime = 0, maxtime = 60, legend.pos=c(5,70),
                     covariates=list(exposure="ciprofloxacin"))
-plot.prevalence.msm(cip.2s.2, mintime = 0, maxtime = 50, legend.pos=NULL,
-                    subset=list(ab="ciprofloxacin"))
 
-### Model 1B. Extract information ---------------------------------------------------------------------------------
+# Compare models
+lrtest.msm(cip.2s.1, cip.2s.2) # Addition of antibiotics (fixed) to base
+lrtest.msm(cip.2s.1, cip.2s.3) # Addition of antibiotics (time-varying) to base
+lrtest.msm(cip.2s.2, cip.2s.4) # Addition of travel to antibiotics (fixed)
+
+### Extract information ---------------------------------------------------------------------------------
 
 # Intensity matrices
 # = a transition intensity matrix and its confidence intervals for a given set of covariate values
-qmatrix.msm(cip.msm_cov)
-qmatrix.msm(cip.msm_cov, covariates=list(exposure="no.antibiotic"))
-qmatrix.msm(cip.msm_cov, covariates=list(exposure="ciprofloxacin"))
-qmatrix.msm(cip.msm_cov, covariates=list(exposure="nitrofurantoin"))
+qmatrix.msm(cip.2s.2)
+qmatrix.msm(cip.2s.2, covariates=list(exposure = "no.antibiotic"))
+qmatrix.msm(cip.2s.2, covariates=list(exposure = "ciprofloxacin"))
+qmatrix.msm(cip.2s.2, covariates=list(exposure = "nitrofurantoin"))
 
-qmatrix.msm(cip.msm_cov, covariates=list(exposure.tv="no.antibiotic"))
-qmatrix.msm(cip.msm_cov, covariates=list(exposure.tv="ciprofloxacin"))
-qmatrix.msm(cip.msm_cov, covariates=list(exposure.tv="post.ciprofloxacin"))
-qmatrix.msm(cip.msm_cov, covariates=list(exposure.tv="nitrofurantoin"))
-qmatrix.msm(cip.msm_cov, covariates=list(exposure.tv="post.nitrofurantoin"))
+qmatrix.msm(cip.2s.3, covariates=list(exposure.tv = "no.antibiotic"))
+qmatrix.msm(cip.2s.3, covariates=list(exposure.tv = "ciprofloxacin"))
+qmatrix.msm(cip.2s.3, covariates=list(exposure.tv = "post.ciprofloxacin"))
+qmatrix.msm(cip.2s.3, covariates=list(exposure.tv = "nitrofurantoin"))
+qmatrix.msm(cip.2s.3, covariates=list(exposure.tv = "post.nitrofurantoin"))
 
 # Transition probability matrix
 # = estimated transition probability matrix P(t) within a given time
-pmatrix.msm(cip.msm_cov, t = 5, covariates=list(exposure="ciprofloxacin"))
-pmatrix.msm(cip.msm_cov, t = 14, covariates=list(exposure="ciprofloxacin"))
+pmatrix.msm(cip.2s.2, t = 5, covariates=list(exposure = "ciprofloxacin"), ci='boot')
+pmatrix.msm(cip.2s.2, t = 14, covariates=list(exposure = "ciprofloxacin"))
 
 # Mean sojourn time
 # = average period in a single stay in a state
-sojourn.msm(cip.msm_cov, covariates=list(exposure="no.antibiotic"))
-sojourn.msm(cip.msm_cov, covariates=list(exposure="nitrofurantoin"))
-sojourn.msm(cip.msm_cov, covariates=list(exposure="ciprofloxacin"))
+sojourn.msm(cip.2s.2, covariates=list(exposure = "no.antibiotic"))
+sojourn.msm(cip.2s.2, covariates=list(exposure = "nitrofurantoin"))
+sojourn.msm(cip.2s.2, covariates=list(exposure = "ciprofloxacin"))
+
+# Probability that each state is next
+# (note: unhelpful for this 2-state model)
+pnext.msm(cip.2s.2)
 
 # Ratio of transition intensities
 # = estimates a ratio of two entries of the transition intensity matrix at a given set of covariate values
-qratio.msm(cip.msm_cov, ind1 = c(1,2), ind2 = c(2,1))
-qratio.msm(cip.msm_cov, ind1 = c(1,2), ind2 = c(2,1), covariates=list(exposure="no.antibiotic"))
-qratio.msm(cip.msm_cov, ind1 = c(1,2), ind2 = c(2,1), covariates=list(exposure="nitrofurantoin"))
-qratio.msm(cip.msm_cov, ind1 = c(1,2), ind2 = c(2,1), covariates=list(exposure="ciprofloxacin"))
+qratio.msm(cip.2s.2, ind1 = c(1,2), ind2 = c(2,1))
+qratio.msm(cip.2s.2, ind1 = c(1,2), ind2 = c(2,1), covariates = list(exposure = "no.antibiotic"))
+qratio.msm(cip.2s.2, ind1 = c(1,2), ind2 = c(2,1), covariates = list(exposure = "nitrofurantoin"))
+qratio.msm(cip.2s.2, ind1 = c(1,2), ind2 = c(2,1), covariates = list(exposure = "ciprofloxacin"))
 
 # Hazard ratios for transition
 # =  estimated hazard ratios corresponding to each covariate effect on the transition intensities
-hazard.msm(cip.msm_cov.3)
-#
+hazard.msm(cip.2s.2)
 
 ### THREE-STATE MODELS: BASED ON SEMI-QUANTITATIVE CULTURE ----------------------------------------------  
 
-### 1. Specification & inits ----------------------------------------------------------------------
+### Specification & inits ----------------------------------------------------------------------
 
 # Transition table
-statetable.msm(state.sq3, id_subject, data=df)
+statetable.msm(state.sq3, id_subject, data = df)
 
 # Permitted transitions
 Q.3 <- rbind(c(0.5, 0.5, 0),
@@ -141,14 +140,41 @@ Q.3.crude <- crudeinits.msm(state.sq3 ~ t,
                           data = df,
                           qmatrix = Q.3)
 
-### Model 2. Run ----------------------------------------------------------------------
+### Run Models ----------------------------------------------------------------------
 
-## Model 2A. No covariates
+## Fit models
 
-# Fit model
-cip.msm3 <- msm(state.sq3 ~ t, subject = id_subject, data = df, 
-                obstype=1, qmatrix = Q.3.crude)
+# Covariates: none
+cip.3s.1 <- msm(state.sq3 ~ t, subject = id_subject, data = df, 
+                obstype = 1, qmatrix = Q.3.crude)
 
-cip.msm3 <- msm(state.sq3 ~ t, subject = id_subject, data=df,
+cip.3s.1 <- msm(state.sq3 ~ t, subject = id_subject, data = df, 
+                obstype = 1, qmatrix = Q.3.crude,
+                method='CG')
+
+cip.3s.1 <- msm(state.sq3 ~ t, subject = id_subject, data = df, 
+                obstype = 1, qmatrix = Q.3.crude,
+                method='CG',
+                control=list(maxit=10000))
+
+# Covariates: antibiotic (fixed)
+cip.3s.2 <- msm(state.sq3 ~ t, subject = id_subject, data = df,
                 obstype = 1, qmatrix = Q.3.crude,
                 covariates = ~ exposure)
+
+cip.3s.2 <- msm(state.sq3 ~ t, subject = id_subject, data = df, 
+                obstype = 1, qmatrix = Q.3.crude,
+                covariates = ~ exposure,
+                method='CG',
+                control=list(maxit=100000))
+
+# Covariates: antibiotic (time-varying)
+cip.3s.3 <- msm(state.sq3 ~ t.subject, subject = id_subject, data = df,
+                obstype = 1, qmatrix=Q.crude,           
+                covariates = ~ exposure.tv)
+
+# Covariates: antibiotic (fixed) + travel to 'endemic' country (transition 1-2)
+cip.3s.4 <- msm(state.sq3 ~ t.subject, subject=id_subject, data = df,
+                obstype = 1, qmatrix=Q.crude,           
+                covariates = list("1-2" = ~ bl_travel + exposure,
+                                  "2-1" = ~ exposure))

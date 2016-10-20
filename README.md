@@ -43,8 +43,8 @@ bl_sex | subject sex | "female","male"
 bl_age | subject age at recruitment | Integer
 bl_travel | travel to 'high risk' country within 12 months | "no","yes"
 **Exposure** ||
-exposure | exposure category (fixed) | "no.antibiotic"  "nitrofurantoin" "ciprofloxacin"
-exposure.tv | exposure category (time varying) | "no.antibiotic", "nitrofurantoin", "post.nitrofurantoin", "ciprofloxacin", "post.ciprofloxacin" 
+exposure | exposure category (fixed) | "no.antibiotic", "nitrofuran", "quinolone"
+exposure.tv | exposure category (time varying) | "no.antibiotic", "nitrofuran", "post.nitrofuran", "quinolone", "post.quinolone" 
 **Observation** ||
 t.subject | time (days) from first sample for that subject (t=0) | integer
 t | time (days) from first sample in that house (t=0) | integer

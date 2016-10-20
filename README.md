@@ -48,7 +48,8 @@ exposure.tv | exposure category (time varying) | "no.antibiotic", "nitrofurantoi
 **Observation** ||
 t.subject | time (days) from first sample for that subject (t=0) | integer
 t | time (days) from first sample in that house (t=0) | integer
-state | colonisation status | 1=not colonised, 2=colonised
+state | colonisation status | 1=not colonised by AMR, 2=colonised by AMR
+state.c3 | colonisation status | 1=colonised by S & not R, 2=not colonised by S or R, 3=colonised by R (+/- S)
 state.sq3 | colonisation status | 1=not colonised, 2='low level colonisation' (RA<=0.1%), 3='high level colonisation' (RA>0.1%)
 sq | semi-quantitative result | continuous
 num | sq numerator check (growth on selective media) | 0=no growth, 1=growth

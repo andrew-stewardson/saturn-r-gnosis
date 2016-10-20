@@ -5,7 +5,7 @@
 # Remove paticipants with missing dates (for now)
 
 # Run script to 'master' dataset
-rm(master)
+rm(master, df)
 
 # csv file made using:
 #     1. source("/Users/andrewstewardson/Dropbox (HumanLabZ)/SATURN/saturnmicro/R/make_master.R")
@@ -18,9 +18,18 @@ master <- read.csv("data/master.csv")
 
 # Keep confirmed ciprofloxacin results for patients in control, nitrofurantoin, or ciprofloxacin households
 temp <- master %>%
-  filter(test=="cip200" & (house.exposure=="control" | house.exposure=="nitrofurantoin" | house.exposure=="ciprofloxacin")) %>%
+  filter(test=="cip200" & (house.exposure=="control" | house.exposure=="nitrofurantoin" | house.exposure=="ciprofloxacin" | house.exposure=="norfloxacin")) %>%
   filter(!is.na(collection.dt)) %>%
-  select(charID, id_house=houseid, id_site=country, bl_sex=sex, bl_age=age, bl_travel=travel_highrisk, exposure, time, state=confirm.bi, sq=screen.sq, den=screen.gth, num=screen.bi, reported.ab.stdt, reported.ab.eddt, collection.dt)
+  select(charID, id_house=houseid, id_site=country, bl_sex=sex, bl_age=age, bl_travel=travel_highrisk, bl_ab12=reported.ab.prev12, bl_residents=houseresidents, exposure, time, state=confirm.bi, sq=screen.sq, den=screen.gth, num=screen.bi, reported.ab.stdt, reported.ab.eddt, collection.dt)
+
+cbind(table(temp$exposure, useNA = 'always'))
+temp$exposure <- as.character(temp$exposure)
+temp$exposure[temp$exposure=='ciprofloxacin'] <- 'quinolone'
+temp$exposure[temp$exposure=='norfloxacin'] <- 'quinolone'
+temp$exposure[temp$exposure=='nitrofurantoin'] <- 'nitrofuran'
+temp$exposure <- factor(temp$exposure,
+                        levels=c('no.antibiotic', 'nitrofuran', 'quinolone'))
+cbind(table(temp$exposure, useNA = 'always'))
 
 # Remove strange observation (date seems wrong)
 temp <- temp %>% filter(!(time=='TP1' & charID=='z-1890-cn-A'))
@@ -104,15 +113,15 @@ df <- df %>% select(-difference)
 
 # Define and 'factorise' exposures
 df$ab[df$exposure=="no.antibiotic"]<-"no.antibiotic"
-df$ab[df$exposure=="ciprofloxacin" & df$time=="TP1"]<-"ciprofloxacin"
-df$ab[df$exposure=="ciprofloxacin" & df$time=="TP2"]<-"post.ciprofloxacin"
-df$ab[df$exposure=="ciprofloxacin" & df$time=="TP3"]<-"post.ciprofloxacin"
-df$ab[df$exposure=="nitrofurantoin" & df$time=="TP1"]<-"nitrofurantoin"
-df$ab[df$exposure=="nitrofurantoin" & df$time=="TP2"]<-"post.nitrofurantoin"
-df$ab[df$exposure=="nitrofurantoin" & df$time=="TP3"]<-"post.nitrofurantoin"
+df$ab[df$exposure=="quinolone" & df$time=="TP1"]<-"quinolone"
+df$ab[df$exposure=="quinolone" & df$time=="TP2"]<-"post.quinolone"
+df$ab[df$exposure=="quinolone" & df$time=="TP3"]<-"post.quinolone"
+df$ab[df$exposure=="nitrofuran" & df$time=="TP1"]<-"nitrofuran"
+df$ab[df$exposure=="nitrofuran" & df$time=="TP2"]<-"post.nitrofuran"
+df$ab[df$exposure=="nitrofuran" & df$time=="TP3"]<-"post.nitrofuran"
 
-df$ab <- factor(df$ab, levels=c("no.antibiotic", "nitrofurantoin", "post.nitrofurantoin", "ciprofloxacin", "post.ciprofloxacin"))
-df$exposure <- factor(df$exposure, levels=c("no.antibiotic", "nitrofurantoin", "ciprofloxacin"))
+df$ab <- factor(df$ab, levels=c("no.antibiotic", "nitrofuran", "post.nitrofuran", "quinolone", "post.quinolone"))
+#df$exposure <- factor(df$exposure, levels=c("no.antibiotic", "nitrofurantoin", "ciprofloxacin"))
 
 # Semi-quantitative states --------------------------
 df$state.sq3[df$state==1] <- 1
@@ -140,6 +149,13 @@ cbind(table(df$state.sq3, useNA = 'always'))
 
 df <- as.data.frame(df)
 
+### Three state S/None/R -------
+
+df$state.c3[df$den!=0 & df$state!=2] <- 1
+df$state.c3[df$den==0] <- 2
+df$state.c3[df$state==2] <- 3
+cbind(table(df$state.c3, useNA = 'always'))
+
 ### Drop bad observations -----------------------
 
 # Keep if >1 observation
@@ -148,9 +164,12 @@ count <- df %>% group_by(charID) %>% summarise(n_obs=n()) # count observations p
 df <- df %>%
   left_join(count, by="charID") %>%       # join number of observations to df
   filter(n_obs>1) %>%                     # keep subjects with >1 observation
-  select(id_subject=charID, id_house, id_site, bl_sex, bl_age, bl_travel, exposure, exposure.tv=ab, t.subject, t, state, state.sq3, sq, den, num, reported.ab.stdt, reported.ab.eddt, collection.dt)  # select relevant fields
+  select(id_subject=charID, id_house, id_site, bl_sex, bl_age, bl_travel, bl_ab12, bl_residents, exposure, exposure.tv=ab, t.subject, t, state, state.c3, state.sq3, sq, den, num, reported.ab.stdt, reported.ab.eddt, collection.dt)  # select relevant fields
 
 ### Output -----------------------
 
 # save R data file
 save(df, file="data/df.Rda")
+
+# tidy
+rm(master, count, na.locf.na, na.nocb.na)

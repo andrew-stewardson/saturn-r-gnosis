@@ -42,6 +42,8 @@ id_site | study site | "Antwerp","Geneva", "Lodz"
 bl_sex | subject sex | "female","male"
 bl_age | subject age at recruitment | Integer
 bl_travel | travel to 'high risk' country within 12 months | "no","yes"
+bl_ab12 | self-reported antibiotic exposure within 12 months | "no", "unsure", "yes"
+bl_residents | people who live in household | integer
 **Exposure** ||
 exposure | exposure category (fixed) | "no.antibiotic", "nitrofuran", "quinolone"
 exposure.tv | exposure category (time varying) | "no.antibiotic", "nitrofuran", "post.nitrofuran", "quinolone", "post.quinolone" 

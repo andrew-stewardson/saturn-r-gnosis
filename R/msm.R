@@ -148,7 +148,7 @@ qratio.msm(cip.2s.2, ind1 = c(1,2), ind2 = c(2,1), covariates = list(exposure = 
 # =  estimated hazard ratios corresponding to each covariate effect on the transition intensities
 hazard.msm(cip.2s.2)
 
-### THREE-STATE MODELS: ENTEROBACTERIACIAE - S, None, R ----------------------------------------------  
+### THREE-STATE MODELS: ENTEROBACTERIACIAE (S/None/R) ----------------------------------------------  
 
 ### Specification & inits ----------------------------------------------------------------------
 
@@ -193,6 +193,12 @@ df.c3$exposure1.tv[df.c3$exposure.tv=='quinolone'] <- 'quinolone'
 df.c3$exposure1.tv[df.c3$exposure.tv=='post.quinolone'] <- 'post.quinolone'
 cbind(table(df.c3$exposure1.tv, useNA = 'always'))
 
+df.c3$post.quinolone[df.c3$exposure.tv!='post.quinolone'] <- 'no'
+df.c3$post.quinolone[df.c3$exposure.tv=='post.quinolone'] <- 'yes'
+df.c3$quinolone[df.c3$exposure.tv!='quinolone'] <- 'no'
+df.c3$quinolone[df.c3$exposure.tv=='quinolone'] <- 'yes'
+cbind(table(df.c3$quinolone, df.c3$post.quinolone, useNA = 'always'))
+
 ### Run Models ----------------------------------------------------------------------
 
 ## Fit models
@@ -210,6 +216,7 @@ cip.3c.2i <- msm(state.c3 ~ t, subject = as.numeric(id_subject), data = df.c3,
                  covariates = ~ exposure1,
                  method='CG',
                  control=list(maxit=10000))
+# CI++
 
 cip.3c.2ii <- msm(state.c3 ~ t, subject = as.numeric(id_subject), data = df.c3, 
                   obstype = 1, qmatrix = Q.3c.crude,
@@ -218,14 +225,34 @@ cip.3c.2ii <- msm(state.c3 ~ t, subject = as.numeric(id_subject), data = df.c3,
                                     #"2-1" = ~ exposure1,
                                     "3-1" = ~ exposure1),
                   method='CG',
-                  control=list(maxit=10000))
+                  control=list(maxit=10000)) # LIKE
 
 # Covariates: quinolone exposure (time-varying)
-cip.3c.3 <- msm(state.c3 ~ t, subject = as.numeric(id_subject), data = df.c3, 
-                obstype = 1, qmatrix = Q.3c.crude,
-                covariates = ~ exposure1.tv,
-                method='CG',
-                control=list(maxit=10000))
+cip.3c.3i <- msm(state.c3 ~ t, subject = as.numeric(id_subject), data = df.c3, 
+                 obstype = 1, qmatrix = Q.3c.crude,
+                 covariates = ~ exposure1.tv,
+                 method='CG',
+                 control=list(maxit=10000)) # CI++
+
+cip.3c.3ii <- msm(state.c3 ~ t, subject = as.numeric(id_subject), data = df.c3, 
+                  obstype = 1, qmatrix = Q.3c.crude,
+                  covariates = list("1-2" = ~ exposure1.tv,
+                                    "1-3" = ~ exposure1.tv,
+                                    "2-3" = ~ exposure1.tv,
+                                    "3-1" = ~ exposure1.tv),
+                  method='CG',
+                  control=list(maxit=10000))
+
+cip.3c.3iii <- msm(state.c3 ~ t, subject = as.numeric(id_subject), data = df.c3, 
+                   obstype = 1, qmatrix = Q.3c.crude,
+                   covariates = list("1-2" = ~ quinolone + bl_ab12,
+                                     "1-3" = ~ quinolone,
+                                     "3-1" = ~ quinolone,
+                                     "2-3" = ~ post.quinolone),
+                   method='CG',
+                   control=list(maxit=10000))
+
+plot.prevalence.msm(cip.3c.3iii, mintime = 0, maxtime = 60, legend.pos = c(1, 100)) # Antibiotics (fixed) + antibiotics within 12 months
 
 ### THREE-STATE MODELS: BASED ON SEMI-QUANTITATIVE CULTURE ----------------------------------------------  
 

@@ -1,4 +1,4 @@
-### Top ------------------------
+### SET-UP ------------------------
 
 # All patients
 # Control, Ciprofloxacin, Nitrofurantoin
@@ -12,9 +12,11 @@ rm(master, df)
 #     2. write.csv(master, file='master.csv')
 #     3. copy to correct folder
 
+### IMPORT & SELECT SUBJECTS ------------------------
+
 master <- read.csv("data/master.csv")
 
-### Select patients ------------------------
+### Select patients
 
 # Keep confirmed ciprofloxacin results for patients in control, nitrofurantoin, or ciprofloxacin households
 temp <- master %>%
@@ -22,19 +24,12 @@ temp <- master %>%
   filter(!is.na(collection.dt)) %>%
   select(charID, id_house=houseid, id_site=country, bl_sex=sex, bl_age=age, bl_travel=travel_highrisk, bl_ab12=reported.ab.prev12, bl_residents=houseresidents, exposure, time, state=confirm.bi, sq=screen.sq, den=screen.gth, num=screen.bi, reported.ab.stdt, reported.ab.eddt, collection.dt)
 
-cbind(table(temp$exposure, useNA = 'always'))
-temp$exposure <- as.character(temp$exposure)
-temp$exposure[temp$exposure=='ciprofloxacin'] <- 'quinolone'
-temp$exposure[temp$exposure=='norfloxacin'] <- 'quinolone'
-temp$exposure[temp$exposure=='nitrofurantoin'] <- 'nitrofuran'
-temp$exposure <- factor(temp$exposure,
-                        levels=c('no.antibiotic', 'nitrofuran', 'quinolone'))
-cbind(table(temp$exposure, useNA = 'always'))
-
 # Remove strange observation (date seems wrong)
 temp <- temp %>% filter(!(time=='TP1' & charID=='z-1890-cn-A'))
 
-### Time scale: Subject (t.subject) ------------------------
+### TIME ------------------------
+
+### Time scale: Subject (t.subject)
 
 # Fix errors (obvious single digits errors)
 temp$collection.dt <- as.character(temp$collection.dt)
@@ -75,7 +70,7 @@ df <- df %>%
   mutate(t.subject = t) %>%
   select(-t)
 
-### Time scale: House (t) ------------------------
+### Time scale: House (t)
 
 # Define day zero for each household (=day first sample collected)
 day.zero <- df %>%
@@ -109,9 +104,19 @@ df$difference <- df$t.subject - df$t # view
 
 df <- df %>% select(-difference)
 
-### Tidy exposures ------------------------
+### EXPOSURES & COVARIATES ------------------------
 
-# Define and 'factorise' exposures
+# Define and 'factorise' fixed antibiotic exposure
+cbind(table(df$exposure, useNA = 'always'))
+df$exposure <- as.character(df$exposure)
+df$exposure[df$exposure=='ciprofloxacin'] <- 'quinolone'
+df$exposure[df$exposure=='norfloxacin'] <- 'quinolone'
+df$exposure[df$exposure=='nitrofurantoin'] <- 'nitrofuran'
+df$exposure <- factor(df$exposure,
+                      levels=c('no.antibiotic', 'nitrofuran', 'quinolone'))
+cbind(table(df$exposure, useNA = 'always'))
+
+# Define and 'factorise' time-varying antibiotic exposure
 df$ab[df$exposure=="no.antibiotic"]<-"no.antibiotic"
 df$ab[df$exposure=="quinolone" & df$time=="TP1"]<-"quinolone"
 df$ab[df$exposure=="quinolone" & df$time=="TP2"]<-"post.quinolone"
@@ -123,14 +128,22 @@ df$ab[df$exposure=="nitrofuran" & df$time=="TP3"]<-"post.nitrofuran"
 df$ab <- factor(df$ab, levels=c("no.antibiotic", "nitrofuran", "post.nitrofuran", "quinolone", "post.quinolone"))
 #df$exposure <- factor(df$exposure, levels=c("no.antibiotic", "nitrofurantoin", "ciprofloxacin"))
 
-# Semi-quantitative states --------------------------
+# Collapse previous antibiotic exposure
+df %>% group_by(bl_ab12) %>% summarise(n=n()) %>% mutate(prop=round(n/sum(n),2))
+df$bl_ab12[df$bl_ab12=='unsure'] <- 'no'
+df %>% group_by(bl_ab12) %>% summarise(n=n()) %>% mutate(prop=round(n/sum(n),2))
+df$bl_ab12 <- factor(as.character(df$bl_ab12),
+                     levels = c('no', 'yes'))
+
+### STATES ------------------------------------------
+
+### Semi-quantitative states
 df$state.sq3[df$state==1] <- 1
 df$state.sq3[df$sq<=0.001 & df$sq>0] <- 2
 df$state.sq3[df$sq>0.001] <- 3
 
-cbind(table(df$state.sq3, useNA = 'always'))
-cbind(table(df$t[is.na(df$state.sq3)], useNA = 'always'))
-cbind(table(df$state.sq3, useNA = 'always'))
+df %>% group_by(state.sq3) %>% summarise(n=n()) %>% mutate(prop=round(n/sum(n),2))
+df %>% filter(is.na(df$state.sq3)) %>% group_by(t) %>% summarise(n=n()) %>% mutate(prop=round(n/sum(n),2))
 
 # Last observation carried forward
 # Adapted from: http://stackoverflow.com/questions/23818493/carry-last-observation-forward-by-id-in-r
@@ -149,16 +162,16 @@ cbind(table(df$state.sq3, useNA = 'always'))
 
 df <- as.data.frame(df)
 
-### Three state S/None/R -------
+#### Three state S/None/R
 
 df$state.c3[df$den!=0 & df$state!=2] <- 1
 df$state.c3[df$den==0] <- 2
 df$state.c3[df$state==2] <- 3
 cbind(table(df$state.c3, useNA = 'always'))
 
-### Drop bad observations -----------------------
+### FINAL TIDY -----------------------
 
-# Keep if >1 observation
+# Keep subjects with >1 observation
 count <- df %>% group_by(charID) %>% summarise(n_obs=n()) # count observations per subject
 
 df <- df %>%
@@ -166,7 +179,7 @@ df <- df %>%
   filter(n_obs>1) %>%                     # keep subjects with >1 observation
   select(id_subject=charID, id_house, id_site, bl_sex, bl_age, bl_travel, bl_ab12, bl_residents, exposure, exposure.tv=ab, t.subject, t, state, state.c3, state.sq3, sq, den, num, reported.ab.stdt, reported.ab.eddt, collection.dt)  # select relevant fields
 
-### Output -----------------------
+### OUTPUT -----------------------
 
 # save R data file
 save(df, file="data/df.Rda")

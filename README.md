@@ -1,6 +1,6 @@
 # saturn-r-gnosis
 
-Collaboration between SATURN WP3 and R-GNOSIS WP8
+Collaboration between [SATURN WP3](http://www.isrctn.com/ISRCTN26797709) and R-GNOSIS WP8
 
 ## Contributors
 

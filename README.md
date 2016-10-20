@@ -51,6 +51,8 @@ t | time (days) from first sample in that house (t=0) | integer
 state | colonisation status | 1=not colonised, 2=colonised
 state.sq3 | colonisation status | 1=not colonised, 2='low level colonisation' (RA<=0.1%), 3='high level colonisation' (RA>0.1%)
 sq | semi-quantitative result | continuous
+num | sq numerator check (growth on selective media) | 0=no growth, 1=growth
+den | sq denominator check (growth on selective media) | 0=no growth, 1=growth
 **Antibiotic dates** ||
 reported.ab.stdt | patient reported first antibiotic dose | yyyy-mm-dd hh:mm:ss
 reported.ab.eddt | patient reported last antibiotic dose |  yyyy-mm-dd hh:mm:ss

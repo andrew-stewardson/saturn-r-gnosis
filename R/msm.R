@@ -83,23 +83,28 @@ cip.2s.4 # Antibiotics (fixed) + travel
 cip.2s.5 # Antibiotics (fixed) + study site
 cip.2s.6 # Antibiotics (fixed) + antibiotics within 12 months
 
-plot.prevalence.msm(cip.2s.1, mintime = 0, maxtime = 60, legend.pos = c(1, 100)) # Base
-plot.prevalence.msm(cip.2s.2, mintime = 0, maxtime = 60, legend.pos = c(1, 100)) # Antibiotics (fixed)
-plot.prevalence.msm(cip.2s.3, mintime = 0, maxtime = 60, legend.pos = c(1, 100)) # Antibiotics (time-varying)
-plot.prevalence.msm(cip.2s.4, mintime = 0, maxtime = 60, legend.pos = c(1, 100)) # Antibiotics (fixed) + travel
-plot.prevalence.msm(cip.2s.5, mintime = 0, maxtime = 60, legend.pos = c(1, 100)) # Antibiotics (fixed) + study site
-plot.prevalence.msm(cip.2s.6, mintime = 0, maxtime = 60, legend.pos = c(1, 100)) # Antibiotics (fixed) + antibiotics within 12 months
+plot.prevalence.msm(cip.2s.1, mintime = 0, maxtime = 42, legend.pos = c(1, 100)) # Base
+plot.prevalence.msm(cip.2s.2, mintime = 0, maxtime = 42, legend.pos = c(1, 100)) # Antibiotics (fixed)
+plot.prevalence.msm(cip.2s.3, mintime = 0, maxtime = 42, legend.pos = c(1, 100)) # Antibiotics (time-varying)
+plot.prevalence.msm(cip.2s.4, mintime = 0, maxtime = 42, legend.pos = c(1, 100)) # Antibiotics (fixed) + travel
+plot.prevalence.msm(cip.2s.5, mintime = 0, maxtime = 42, legend.pos = c(1, 100)) # Antibiotics (fixed) + study site
+plot.prevalence.msm(cip.2s.6, mintime = 0, maxtime = 42, legend.pos = c(1, 100)) # Antibiotics (fixed) + antibiotics within 12 months
 
-plot.prevalence.msm(cip.2s.2, mintime = 0, maxtime = 60, legend.pos=c(1, 100),
-                    covariates = list(exposure = "no.antibiotic"))
-plot.prevalence.msm(cip.2s.2, mintime = 0, maxtime = 60, legend.pos=c(1, 100),
-                    covariates = list(exposure = "nitrofuran"))
-plot.prevalence.msm(cip.2s.2, mintime = 0, maxtime = 60, legend.pos=c(1, 100),
-                    covariates = list(exposure = "quinolone"))
+plot.prevalence.msm(cip.2s.2, mintime = 0, maxtime = 42, legend.pos=c(1, 100),
+                    covariates = list(exposure = "no.antibiotic"),
+                    subset = as.numeric(unique(df$id_subject[df$exposure== "no.antibiotic"])))
 
-plot.prevalence.msm(cip.2s.2, mintime = 0, maxtime = 60, legend.pos=c(1, 100),
-                    covariates = list(exposure = "quinolone"),
-                    subset = c(df$exposure == "quinolone"))
+plot.prevalence.msm(cip.2s.2, mintime = 0, maxtime = 42, legend.pos=c(1, 100),
+                    covariates = list(exposure = "nitrofuran"),
+                    subset = as.numeric(unique(df$id_subject[df$exposure== "nitrofuran"])))
+
+value <- "quinolone"
+is <- as.vector(df %>% filter(exposure==value & t.subject==0) %>% group_by(state) %>% summarise(n=n()))[,2]
+plot.prevalence.msm(cip.2s.2, mintime = 0, maxtime = 42, legend.pos=c(1, 100),
+                    covariates = list(exposure = value),
+                    initstates = is$n,
+                    subset = as.numeric(unique(df$id_subject[df$exposure== value])),
+                    xlab = 'Days')
 
 # Compare models
 lrtest.msm(cip.2s.1, cip.2s.2) # Addition of antibiotics (fixed) to base
@@ -199,6 +204,23 @@ df.c3$quinolone[df.c3$exposure.tv!='quinolone'] <- 'no'
 df.c3$quinolone[df.c3$exposure.tv=='quinolone'] <- 'yes'
 cbind(table(df.c3$quinolone, df.c3$post.quinolone, useNA = 'always'))
 
+# Another version
+df.c3$antibiotic[df.c3$exposure.tv=='no.antibiotic'] <- 'no'
+df.c3$antibiotic[df.c3$exposure.tv=='nitrofuran'] <- 'nitro'
+df.c3$antibiotic[df.c3$exposure.tv=='post.nitrofuran'] <- 'no'
+df.c3$antibiotic[df.c3$exposure.tv=='quinolone'] <- 'quin'
+df.c3$antibiotic[df.c3$exposure.tv=='post.quinolone'] <- 'no'
+df.c3$antibiotic <- factor(df.c3$antibiotic, levels = c('no', 'nitro', 'quin'))
+cbind(table(df.c3$antibiotic, useNA = 'always'))
+
+df.c3$post.antibiotic[df.c3$exposure.tv=='no.antibiotic'] <- 'no'
+df.c3$post.antibiotic[df.c3$exposure.tv=='nitrofuran'] <- 'no'
+df.c3$post.antibiotic[df.c3$exposure.tv=='post.nitrofuran'] <- 'post.nitro'
+df.c3$post.antibiotic[df.c3$exposure.tv=='quinolone'] <- 'no'
+df.c3$post.antibiotic[df.c3$exposure.tv=='post.quinolone'] <- 'post.quin'
+df.c3$post.antibiotic <- factor(df.c3$post.antibiotic, levels = c('no', 'post.nitro', 'post.quin'))
+cbind(table(df.c3$post.antibiotic, useNA = 'always'))
+
 ### Run Models ----------------------------------------------------------------------
 
 ## Fit models
@@ -209,14 +231,16 @@ cip.3c.1 <- msm(state.c3 ~ t.subject, subject = as.numeric(id_subject), data = d
                 method='CG',
                 control=list(maxit=10000))
 
+plot.prevalence.msm(cip.3c.1, mintime = 0, maxtime = 42, legend.pos=c(1, 100),
+                    xlab = 'Days')
+
 # Covariates: quinolone exposure (fixed)
 
 cip.3c.2i <- msm(state.c3 ~ t, subject = as.numeric(id_subject), data = df.c3, 
                  obstype = 1, qmatrix = Q.3c.crude,
                  covariates = ~ exposure1,
                  method='CG',
-                 control=list(maxit=10000))
-# CI++
+                 control=list(maxit=10000)) # CI++
 
 cip.3c.2ii <- msm(state.c3 ~ t, subject = as.numeric(id_subject), data = df.c3, 
                   obstype = 1, qmatrix = Q.3c.crude,
@@ -226,6 +250,14 @@ cip.3c.2ii <- msm(state.c3 ~ t, subject = as.numeric(id_subject), data = df.c3,
                                     "3-1" = ~ exposure1),
                   method='CG',
                   control=list(maxit=10000)) # LIKE
+
+value <- "quinolone"
+is <- as.vector(df.c3 %>% filter(exposure1==value & t.subject==0) %>% group_by(state) %>% summarise(n=n()))[,2]
+plot.prevalence.msm(cip.3c.2ii, mintime = 0, maxtime = 42, legend.pos=c(1, 100),
+                    covariates = list(exposure1 = value),
+                    initstates = is$n,
+                    subset = as.numeric(unique(df$id_subject[df$exposure1 == value])),
+                    xlab = 'Days')
 
 # Covariates: quinolone exposure (time-varying)
 cip.3c.3i <- msm(state.c3 ~ t, subject = as.numeric(id_subject), data = df.c3, 
@@ -252,7 +284,22 @@ cip.3c.3iii <- msm(state.c3 ~ t, subject = as.numeric(id_subject), data = df.c3,
                    method='CG',
                    control=list(maxit=10000))
 
-plot.prevalence.msm(cip.3c.3iii, mintime = 0, maxtime = 60, legend.pos = c(1, 100)) # Antibiotics (fixed) + antibiotics within 12 months
+plot.prevalence.msm(cip.3c.3iii, mintime = 0, maxtime = 30) # Antibiotics (fixed) + antibiotics within 12 months
+
+plot.prevalence.msm(cip.3c.3iii, mintime = 0, maxtime = 30, legend.pos=c(1, 100),
+                    covariates = list(quinolone = "yes"),
+                    subset = as.numeric(unique(df$id_subject[df.c3$quinolone== "yes"])))
+
+# Covariates: antibiotic exposure (time-varying)
+cip.3c.4 <- msm(state.c3 ~ t, subject = as.numeric(id_subject), data = df.c3, 
+                   obstype = 1, qmatrix = Q.3c.crude,
+                   covariates = list("1-2" = ~ antibiotic,
+                                     "1-3" = ~ antibiotic,
+                                     "3-1" = ~ antibiotic,
+                                     "2-3" = ~ post.antibiotic),
+                   method='CG',
+                   control=list(maxit=10000))
+
 
 ### THREE-STATE MODELS: BASED ON SEMI-QUANTITATIVE CULTURE ----------------------------------------------  
 
